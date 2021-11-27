@@ -9,3 +9,11 @@ The entry is spl/SPL_sampler.java/main
   		SPL_sampler.getInstance().sampling_ProbSAT(fmFile, outputDir, runs, nbProds); //ProbSAT
       
   		SPL_sampler.getInstance().sampling_PaDProbSAT(fmFile, outputDir, runs, nbProds); //PaD+ProbSAT
+
+Some parameters should be specified.
+
+ 	  String outputDir = "./output/";  // output dir
+  
+  	int runs = 2; // How many runs
+    
+  	int nbProds = 100; // How many products (samples) returned (100, 500, 1000, or any number you want)
