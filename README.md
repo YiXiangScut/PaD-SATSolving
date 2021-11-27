@@ -12,7 +12,7 @@ The entry is spl/SPL_sampler.java/main
 
 Some parameters should be specified.
 
- 	  String outputDir = "./output/";  // output dir
+ 	String outputDir = "./output/";  // output dir
   
   	int runs = 2; // How many runs
     
