@@ -5,9 +5,9 @@
  * Reference: 
  *  
  * Yi Xiang, Xiaowei Yang,Han Huang, Miqing Li
- * Looking For Novelty in Search-based Software Product Line Testing, TSE, 2021
+ * Sampling Configurations From Software Product Lines Via Probability-aware Diversification and SAT Solving, submitted
  * 
- * Data: 25/01/2021
+ * Data: 28/11/2021
  * Copyright (c) 2021 Yi Xiang
  * 
  * Note: This is a free software developed based on the open 
