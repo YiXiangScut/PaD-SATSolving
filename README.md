@@ -14,6 +14,6 @@ Code for "Sampling Configurations From Software Product Lines Via Probability-aw
 
     String outputDir = "./output/";  // output dir
 
-    int runs = 2; // How many runs
+    int runs = 30; // How many runs
 
     int nbProds = 100; // How many products (samples) returned (100, 500, 1000, or any number you want)
