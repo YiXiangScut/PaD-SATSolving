@@ -31,4 +31,4 @@ Note that spread is stored as "invertedDist" in the hard disk.
 
 Step 3: To get latex tables, please run src/spl/GenerateTablesMain.java. 
 
-# Please feel free to contact Dr. Yi Xiang at gzhuxiang_yi@163.com if you have any questions. 
+Please feel free to contact Dr. Yi Xiang at gzhuxiang_yi@163.com if you have any questions. 
