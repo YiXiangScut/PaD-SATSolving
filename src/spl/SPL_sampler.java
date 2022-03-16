@@ -34,18 +34,12 @@ package spl;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.io.LineNumberReader;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -56,8 +50,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.commons.math3.util.ArithmeticUtils;
 import org.sat4j.core.VecInt;
@@ -82,8 +74,6 @@ import jmetal.encodings.variable.Binary;
 import jmetal.util.PseudoRandom;
 import spl.fm.Product;
 import spl.fm.TSet;
-import spl.techniques.DistancesUtil;
-import spl.techniques.SimilarityTechnique;
 //import spl.techniques.ga.GA;
 //import spl.techniques.ga.Individual;
 import spl.utils.FileUtils;
@@ -91,8 +81,19 @@ import splar.core.constraints.CNFClause;
 import splar.core.constraints.CNFFormula;
 import splar.core.fm.FeatureModel;
 import splar.core.fm.XMLFeatureModel;
-import splar.plugins.reasoners.sat.sat4j.FMReasoningWithSAT;
 import splar.plugins.reasoners.sat.sat4j.ReasoningWithSAT;
+
+import java.io.IOException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 
 public class SPL_sampler {
 
@@ -135,71 +136,65 @@ public class SPL_sampler {
 
   	String [] fms = {  			
   			/** ***************** Small-scale*****************  */
-			"X264",//16
-//			"Dune", //17
-//			"BerkeleyDBC", //18
-//			"lrzip", //20
-//			"CounterStrikeSimpleFeatureModel", //24
-//			"HiPAcc",//31
-//			"SPLSSimuelESPnP",//32
-//			"JavaGC",//39
-//			"Polly", //40
-//			"DSSample", //41    
-//			"VP9",//42
-//			"WebPortal",//43
-//			"7z",// 44
-//			"JHipster", //45
-//			"Drupal", //48
-//			"ElectronicDrum", //52
-//			"SmartHomev2.2",//60
-//			"VideoPlayer",//71
-//			"Amazon",//79
-//			"ModelTransformation", //88
-//			"CocheEcologico", //94
-//			"Printers",//172
-//			"fiasco_17_10",//234
-//			"uClibc-ng_1_0_29",//269
-//			"E-shop",//290
-//			"toybox",//544
-//			"axTLS", // 684
-//			"financial",//771 
-//			"busybox_1_28_0", // 998  			
+			"CounterStrikeSimpleFeatureModel", //24
+			"HiPAcc",//31
+			"SPLSSimuelESPnP",//32
+			"JavaGC",//39
+			"Polly", //40
+			"DSSample", //41    
+			"VP9",//42
+			"WebPortal",//43
+			"JHipster", //45
+			"Drupal", //48
+			"SmartHomev2.2",//60
+			"VideoPlayer",//71
+			"Amazon",//79
+			"ModelTransformation", //88
+			"CocheEcologico", //94
+			"Printers",//172
+			"fiasco_17_10",//234
+			"uClibc-ng_1_0_29",//269
+			"E-shop",//290
+			"toybox",//544
+			"axTLS", // 684
+			"financial",//771 
+			"busybox_1_28_0", // 998  			
 //  			/***************Median-scale******************** */
-//			"mpc50", //1213
-//			"ref4955",//1218  		
-//			"linux", //1232
-//			"csb281", //1233
-//			"ecos-icse11", //1244
-//			"ebsa285", //1245
-//			"vrc4373", // 1247
-//			"pati", // 1248
-//			"dreamcast", //1252
-//			"pc_i82544", //1259
-//			"XSEngine",  //1260
-//			"refidt334", //1263
-//			"ocelot", //1266
-//			"integrator_arm9", //1267
-//			"olpcl2294", //1273
-//			"olpce2294", //1274
-//			"phycore", // 1274
-//			"hs7729pci", //1298
-//			"freebsd-icse11",//1396
-//			"fiasco",//1638
-//			"uClinux",//1850
-//			"Automotive01", //2513 
-//			"SPLOT-3CNF-FM-5000-1000-0,30-SAT-1",// 5000  			
-//  			/*******************  Large-scale ***************** */
-//			 "busybox-1.18.0",//6796
-//			 "2.6.28.6-icse11", //6888
-//			 "uClinux-config", //11254
-//			 "buildroot", // 14910
-
+			"mpc50", //1213
+			"ref4955",//1218  		
+			"linux", //1232
+			"csb281", //1233
+			"ecos-icse11", //1244
+			"ebsa285", //1245
+			"vrc4373", // 1247
+			"pati", // 1248
+			"dreamcast", //1252
+			"pc_i82544", //1259
+			"XSEngine",  //1260
+			"refidt334", //1263
+			"ocelot", //1266
+			"integrator_arm9", //1267
+			"olpcl2294", //1273
+			"olpce2294", //1274
+			"phycore", // 1274
+			"hs7729pci", //1298
+			"freebsd-icse11",//1396
+			"fiasco",//1638
+			"uClinux",//1850
+			"Automotive01", //2513 
+			"SPLOT-3CNF-FM-5000-1000-0,30-SAT-1",// 5000  			
+////  			 /*******************  Large-scale ***************** */
+			 "busybox-1.18.0",//6796
+			 "2.6.28.6-icse11", //6888
+			 "uClinux-config", //11254
+			 "buildroot", // 14910
+			 "freetz", //31012	
   	};    	
     
   	//------------------------------------can be manually set------------------  
  	String outputDir = "./output/";  // output dir
-  	int runs = 2; // How many runs
-  	int nbProds = 100; // How many products (samples) returned (100, 500, 1000, or any number you want)
+  	int runs =30; // How many runs
+  	int nbProds = 100; // 12,65,212 How many products (samples) returned (100, 500, 1000, or any number you want)
   	//------------------------------------can be manually set (end) ------------------
   	  	
   	String fmFile = null;
@@ -210,11 +205,23 @@ public class SPL_sampler {
   		System.out.println(fmFile);  		  		  		
   		SPL_sampler.getInstance().initializeModelSolvers(fmFile);  	
   		  		
-  		// Start sampling
+  		// Start sampling  		
+//  		SPL_sampler.getInstance().sampling_SAT4J(fmFile, outputDir, runs, nbProds); //SAT4J
+//  		SPL_sampler.getInstance().sampling_PaDSAT4J(fmFile, outputDir, runs, nbProds); //PaD+SAT4J
+  		
   		SPL_sampler.getInstance().sampling_rSAT4J(fmFile, outputDir, runs, nbProds); //rSAT4J
-  		SPL_sampler.getInstance().sampling_PaDrSAT4J(fmFile, outputDir, runs, nbProds); //PaD+rSAT4J
+  		SPL_sampler.getInstance().sampling_PaDrSAT4J(fmFile, outputDir, runs, nbProds); //PaD+rSAT4J  		
+//  		SPL_sampler.getInstance().sampling_PaDrSAT4JCheckingUnchangedVars(fmFile, outputDir, runs, nbProds); // Used in examining how many unchanged variables
+//  		
   		SPL_sampler.getInstance().sampling_ProbSAT(fmFile, outputDir, runs, nbProds); //ProbSAT
   		SPL_sampler.getInstance().sampling_PaDProbSAT(fmFile, outputDir, runs, nbProds); //PaD+ProbSAT
+  		
+  			// The following is used to generate training data for ML-based model prediction
+//  			SPL_sampler.getInstance().sampling_rSAT4JForML(fmFile, outputDir, runs, nbProds); //rSAT4JForML
+//  			SPL_sampler.getInstance().sampling_PaDrSAT4JForML(fmFile, outputDir, runs, nbProds);
+//  			SPL_sampler.getInstance().sampling_probSATForML(fmFile, outputDir, runs, nbProds);
+//  			SPL_sampler.getInstance().sampling_PaDprobSATForML(fmFile, outputDir, runs, nbProds);
+  		
 	}
   	
   } // main
@@ -226,7 +233,56 @@ public class SPL_sampler {
         }
         return instance;
     }
-        
+     
+    /**
+     * @param fmFile
+     * @param outputDir
+     * @param runs
+     * @param nbProds
+     * @throws Exception
+     */
+    public void sampling_SAT4J(String fmFile, String outputDir, int runs, int nbProds) 
+    		throws Exception {
+
+		String sNbProds = "" + nbProds;
+		String fmFileName = new File(fmFile).getName();  
+		
+		String NSVariant =  "SAT4JnoOrder"; // sampler: SAT4J 
+		System.out.println("Start sampling..., sampler's name:" + NSVariant);        
+		
+		// for each run 
+		for (int i = 0; i < runs; i++) {
+			
+			System.out.println(NSVariant + "：run " + (i));
+			
+			List<Product> sampleSet =  new ArrayList<Product>(nbProds); // sampleSet 
+			Product prod;    
+			
+			long startTimeMS = System.currentTimeMillis() ;   
+			
+			int count = 0;	
+			while (count < nbProds) {  	      		  
+		      	prod = SPL_sampler.getInstance().getOneRandomProductSAT4J(); // Use SAT4J        	
+ 	
+		      	if (!sampleSet.contains(prod)) { // 
+		      		sampleSet.add(prod);// 
+		      		count = count + 1; 
+		    	}	 
+		      
+		      } // while 
+			
+			long endTimeMS = System.currentTimeMillis() - startTimeMS;
+			
+			String path = outputDir + NSVariant + "/" + fmFileName +"/Samples/" + sNbProds + "prods/";
+			FileUtils.CheckDir(path); 
+			
+			writeProductsToFile(path + "Products." + i, sampleSet); // write samples
+			writeDataToFile(path + "RUNTIME." + i, endTimeMS);// write runtime
+			
+		} //for  each run 	
+		
+    } // sampling_SAT4J
+    
     /**
      * @param fmFile
      * @param outputDir
@@ -277,6 +333,402 @@ public class SPL_sampler {
     } // sampling_rSAT4J
     
     
+    /**
+     * @param fmFile
+     * @param outputDir
+     * @param runs
+     * @param nbProds
+     * @throws Exception
+     */
+    public void sampling_rSAT4JForML(String fmFile, String outputDir, int runs, int nbProds) 
+    		throws Exception {
+
+		String sNbProds = "" + nbProds;
+		String fmFileName = new File(fmFile).getName();  
+		
+		String basePath = outputDir + "ModelPredictionResults/Distance-Based_Data_Size/SupplementaryWebsite/";
+		
+		String NSVariant =  "rSAT4J"; // sampler: rSAT4J 
+		System.out.println("Start sampling..., sampler's name:" + NSVariant);        
+		
+		for (int k = 0; k <= 16; k++) { // 17 instances
+			// for each run 
+			for (int i = 0; i < runs; i++) {
+				
+				System.out.println(NSVariant + "：run " + (i));
+				
+				List<Product> sampleSet =  new ArrayList<Product>(nbProds); // sampleSet 
+				Product prod;    
+				
+				long startTimeMS = System.currentTimeMillis() ;   
+				
+				int count = 0;	
+				while (count < nbProds) {  	      		  
+			      	prod = SPL_sampler.getInstance().getOneRandomProductRandomlizedSAT4J(); // Use rSAT4J        	
+	 	
+			      	if (!sampleSet.contains(prod)) { // 
+			      		sampleSet.add(prod);// 
+			      		count = count + 1;  
+			    	}	
+			      	
+			      } // while 
+				
+				long endTimeMS = System.currentTimeMillis() - startTimeMS;
+				
+				String path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t1.csv";
+				
+				if (nbProds == 65) 
+					path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t2.csv";
+				
+				if (nbProds == 212) 
+					path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t3.csv";
+								
+				FileUtils.CheckDir(path); 
+				
+				String xmlReadPath =  basePath + "/MeasuredPerformanceValues/x264_" + k + "/measurements.xml";
+				
+				writeProductsToFileForModelPrediction(path, sampleSet,xmlReadPath); // write samples
+				//writeDataToFile(path + "RUNTIME." + i, endTimeMS);// write runtime
+				
+			} //for  each run 
+			
+		} // for k
+		
+    } // sampling_rSAT4J
+    
+    /**
+     * @param fmFile
+     * @param outputDir
+     * @param runs
+     * @param nbProds
+     * @throws Exception
+     */
+    public void sampling_probSATForML(String fmFile, String outputDir, int runs, int nbProds) 
+    		throws Exception {
+
+		String sNbProds = "" + nbProds;
+		String fmFileName = new File(fmFile).getName();  
+		
+		String basePath = outputDir + "ModelPredictionResults/Distance-Based_Data_Size/SupplementaryWebsite/";
+		
+		String NSVariant =  "ProbSAT"; // sampler: ProbSAT 
+		System.out.println("Start sampling..., sampler's name:" + NSVariant);        
+		
+		for (int k = 0; k <= 16; k++) { // 17 instances
+			// for each run 
+			for (int i = 0; i < runs; i++) {
+				
+				System.out.println(NSVariant + "：run " + (i));
+				
+				List<Product> sampleSet =  new ArrayList<Product>(nbProds); // sampleSet 
+				Product prod;    
+				
+				long startTimeMS = System.currentTimeMillis() ;   
+				
+				int count = 0;	
+				while (count < nbProds) {  	      		  
+			      	prod = SPL_sampler.getInstance().getOneRandomProductProbSAT(); // Use ProbSAT        	
+	 	
+			      	if (!sampleSet.contains(prod)) { // 
+			      		sampleSet.add(prod);// 
+			      		count = count + 1;  
+			    	}	
+			      	
+			      } // while 
+				
+				long endTimeMS = System.currentTimeMillis() - startTimeMS;
+				
+				String path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t1.csv";
+				
+				if (nbProds == 65) 
+					path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t2.csv";
+				
+				if (nbProds == 212) 
+					path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t3.csv";
+								
+				FileUtils.CheckDir(path); 
+				
+				String xmlReadPath =  basePath + "/MeasuredPerformanceValues/x264_" + k + "/measurements.xml";
+				
+				writeProductsToFileForModelPrediction(path, sampleSet,xmlReadPath); // write samples
+				//writeDataToFile(path + "RUNTIME." + i, endTimeMS);// write runtime
+				
+			} //for  each run 
+			
+		} // for k
+		
+    } // sampling_rSAT4J
+    
+    /**
+     * @param fmFile
+     * @param outputDir
+     * @param runs
+     * @param nbProds
+     * @throws Exception
+     */
+    public void sampling_PaDprobSATForML(String fmFile, String outputDir, int runs, int nbProds) 
+    		throws Exception {
+
+		String sNbProds = "" + nbProds;
+		String fmFileName = new File(fmFile).getName();  
+		
+		String basePath = outputDir + "ModelPredictionResults/Distance-Based_Data_Size/SupplementaryWebsite/";
+		
+		String NSVariant =  "PaDprobSAT"; // sampler: PaDprobSAT 
+		System.out.println("Start sampling..., sampler's name:" + NSVariant);        
+		
+		for (int k = 0; k <= 16; k++) { // 17 instances
+			// for each run 
+			for (int i = 0; i < runs; i++) {
+				
+				System.out.println(NSVariant + "：run " + (i));
+				
+				List<Product> sampleSet =  new ArrayList<Product>(nbProds); // sampleSet 
+				Product prod;    
+				
+				long startTimeMS = System.currentTimeMillis() ;   
+				
+				int count = 0;	
+				while (count < nbProds) {  	      		  
+			      	prod = SPL_sampler.getInstance().getOneRandomProductProbSATDiverse(); // Use PaD+ProbSAT        	
+	 	
+			      	if (!sampleSet.contains(prod)) { // 
+			      		sampleSet.add(prod);// 
+			      		count = count + 1;  
+			    	}	
+			      	
+			      } // while 
+				
+				long endTimeMS = System.currentTimeMillis() - startTimeMS;
+				
+				String path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t1.csv";
+				
+				if (nbProds == 65) 
+					path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t2.csv";
+				
+				if (nbProds == 212) 
+					path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t3.csv";
+								
+				FileUtils.CheckDir(path); 
+				
+				String xmlReadPath =  basePath + "/MeasuredPerformanceValues/x264_" + k + "/measurements.xml";
+				
+				writeProductsToFileForModelPrediction(path, sampleSet,xmlReadPath); // write samples
+				//writeDataToFile(path + "RUNTIME." + i, endTimeMS);// write runtime
+				
+			} //for  each run 
+			
+		} // for k
+		
+    } // sampling_rSAT4J
+    
+    
+    /**
+     * @param fmFile
+     * @param outputDir
+     * @param runs
+     * @param nbProds
+     * @throws Exception
+     */
+    public void sampling_PaDrSAT4JForML(String fmFile, String outputDir, int runs, int nbProds) 
+    		throws Exception {
+
+		String sNbProds = "" + nbProds;
+		String fmFileName = new File(fmFile).getName();  
+		
+		String basePath = outputDir + "ModelPredictionResults/Distance-Based_Data_Size/SupplementaryWebsite/";
+		
+		String NSVariant =  "PaDrSAT4J"; // sampler: PaDrSAT4J 
+		System.out.println("Start sampling..., sampler's name:" + NSVariant);        
+		
+		for (int k = 0; k <= 16; k++) { // 17 instances
+			// for each run 
+			for (int i = 0; i < runs; i++) {
+				
+				System.out.println(NSVariant + "：run " + (i));
+				
+				List<Product> sampleSet =  new ArrayList<Product>(nbProds); // sampleSet 
+				Product prod;    
+				
+				long startTimeMS = System.currentTimeMillis() ;   
+				
+				int count = 0;	
+				while (count < nbProds) {  	      		  
+			      	prod = SPL_sampler.getInstance().getOneRandomProductRandomlizedSAT4JDiverse(); // Use PaD+rSAT4J        	
+	 	
+			      	if (!sampleSet.contains(prod)) { // 
+			      		sampleSet.add(prod);// 
+			      		count = count + 1;  
+			    	}	
+			      	
+			      } // while 
+				
+				long endTimeMS = System.currentTimeMillis() - startTimeMS;
+				
+				String path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t1.csv";
+				
+				if (nbProds == 65) 
+					path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t2.csv";
+				
+				if (nbProds == 212) 
+					path = basePath + "/PerformancePredictions/AllExperiments/x264_" + k + "/" + "x264_"+k+"_"+ (i+1) + "/"
+						     +  "sampledConfigurations_"+ NSVariant + "_t3.csv";
+								
+				FileUtils.CheckDir(path); 
+				
+				String xmlReadPath =  basePath + "/MeasuredPerformanceValues/x264_" + k + "/measurements.xml";
+				
+				writeProductsToFileForModelPrediction(path, sampleSet,xmlReadPath); // write samples
+				//writeDataToFile(path + "RUNTIME." + i, endTimeMS);// write runtime
+				
+			} //for  each run 
+			
+		} // for k
+		
+    } // sampling_rSAT4J
+    
+    /**
+     * @param fmFile
+     * @param outputDir
+     * @param runs
+     * @param nbProds
+     * @throws Exception
+     */
+    public void sampling_PaDSAT4J(String fmFile, String outputDir, int runs, int nbProds) 
+    		throws Exception {
+
+		String sNbProds = "" + nbProds;
+		String fmFileName = new File(fmFile).getName();  
+		
+		String NSVariant =  "PaD+SAT4Jnew"; // sampler: PaD+SAT4J 
+		
+		System.out.println("Start sampling..., sampler's name:" + NSVariant);        
+		
+		// for each run 
+		for (int i = 0; i < runs; i++) {
+			
+			System.out.println(NSVariant + "：run " + (i));
+			
+			List<Product> sampleSet =  new ArrayList<Product>(nbProds); // sampleSet 
+			Product prod;    
+			
+			long startTimeMS = System.currentTimeMillis() ;   
+			
+			int count = 0;	
+			while (count < nbProds) {  
+				
+				prod = SPL_sampler.getInstance().getOneRandomProductSAT4JDiverse();	
+				
+		      	if (!sampleSet.contains(prod)) { // 
+		      		sampleSet.add(prod);// 
+		      		count = count + 1;  
+		    	}	
+		      	
+		      } // while 
+			
+			long endTimeMS = System.currentTimeMillis() - startTimeMS;
+			
+			String path = outputDir + NSVariant + "/" + fmFileName +"/Samples/" + sNbProds + "prods/";
+			FileUtils.CheckDir(path); 
+			
+			writeProductsToFile(path + "Products." + i, sampleSet); // write samples
+			writeDataToFile(path + "RUNTIME." + i, endTimeMS);// write runtime
+			
+		} //for  each run 	
+		
+    } // sampling_PaDSAT4J
+    
+    public  Product  getOneRandomProductSAT4JDiverse() throws Exception {
+		// Generate a random binary to ensure that all features are considered
+		Binary randomBinary = new Binary(numFeatures,PseudoRandom.randDouble(-0.05,1.05));// PaD
+		
+	    for (Integer f : mandatoryFeaturesIndices) { 
+	    	randomBinary.setIth(f, true);               	
+	     }
+	
+	     for (Integer f : deadFeaturesIndices) {
+	    	 randomBinary.setIth(f, false);    
+	     }
+	            
+	     //----------------------------------------------------------------
+	
+     	HashSet<Integer> blacklist = new HashSet<Integer>();  
+	    HashSet<Integer> backupBlacklist = new HashSet<Integer>();  
+
+        int violated = numViolatedConstraints(randomBinary, blacklist, backupBlacklist);      		       		      
+        
+        if (violated > 0) {
+            IVecInt iv = new VecInt();
+
+            for (int j : featureIndicesAllowedFlip) {
+                int feat = j + 1;
+            
+                if (!blacklist.contains(feat)) {
+                    iv.push(randomBinary.bits_.get(j) ? feat : -feat);
+                }
+         
+            }       
+	      //----------------------------------------------------------------        
+	            
+	       if (solverIterator.isSatisfiable()) {        	
+	        	
+	        	IOrder order;       
+	            order = new RandomWalkDecorator(new VarOrderHeap(new RandomLiteralSelectionStrategy()), 1);	  	            
+
+		       	((Solver) solverIterator).setOrder(order); 		
+		       	
+	           int[] partialProd = solverIterator.findModel(iv); // partialProd contains only variables in CNF constraints
+           
+	           // Have another call
+	           if (partialProd == null) {
+	               System.out.println("not not satisfiable()");
+	                        
+	               iv.clear();
+	               
+	               for (int j : featureIndicesAllowedFlip) {
+	                      int feat = j + 1;
+	                  
+	                      if (!backupBlacklist.contains(feat)) {
+	                          iv.push(randomBinary.bits_.get(j) ? feat : -feat);
+	                      }
+	               
+	                  }	               
+	              
+	               partialProd = solverIterator.findModel(iv);
+	               
+	           }
+	           
+	           
+	           for (int j = 0; j < partialProd.length; j++) {
+	               int feat = partialProd[j];
+	               
+	               int posFeat = feat > 0 ? feat : -feat;
+	
+	               if (posFeat > 0) {
+	               	randomBinary.setIth(posFeat - 1,feat > 0);
+	               }
+	           }// for	           
+	       } 
+	       else {//if
+	          	System.out.println("solverIterator is not satisfiable()");
+	       }   
+      }     
+       
+      Product product  = toProduct(randomBinary);
+
+      return product;            
+ }
     /**
      * @param fmFile
      * @param outputDir
@@ -336,13 +788,171 @@ public class SPL_sampler {
      * @param nbProds
      * @throws Exception
      */
+    public void sampling_PaDrSAT4JCheckingUnchangedVars(String fmFile, String outputDir, int runs, int nbProds) 
+    		throws Exception {
+
+		String sNbProds = "" + nbProds;
+		String fmFileName = new File(fmFile).getName();  
+		
+		String NSVariant =  "CheckingUnchangedVars"; // sampler:  
+		
+		System.out.println("Start sampling..., sampler's name:" + NSVariant);        
+		
+		// for each run 
+		for (int i = 0; i < runs; i++) {
+			
+			System.out.println(NSVariant + "：run " + (i));
+			
+			List<Product> sampleSet =  new ArrayList<Product>(nbProds); // sampleSet 
+			Product prod;    
+			Binary randomBinary = null;
+					
+			long startTimeMS = System.currentTimeMillis() ;   
+			
+			int count = 0;
+			int unchangedVars = 0;
+			int originalUnchanged = 0;
+			
+			while (count < nbProds) {  		
+				
+				//--------------------------before--------------------------------
+				randomBinary = new Binary(numFeatures,PseudoRandom.randDouble(-0.05,1.05));// PaD
+				
+			    for (Integer f : mandatoryFeaturesIndices) { 
+			    	randomBinary.setIth(f, true);               	
+			     }
+			
+			     for (Integer f : deadFeaturesIndices) {
+			    	 randomBinary.setIth(f, false);    
+			     }
+			            
+			     //----------------------------------------------------------------
+			    HashSet<Integer> blacklist = new HashSet<Integer>();  
+			    HashSet<Integer> backupBlacklist = new HashSet<Integer>();  
+		
+		        int violated = numViolatedConstraints(randomBinary, blacklist, backupBlacklist);      		       		      
+		        
+		        if (violated > 0) {
+		            IVecInt iv = new VecInt();
+
+		            for (int j : featureIndicesAllowedFlip) {
+		                int feat = j + 1;
+		            
+		                if (!blacklist.contains(feat)) {
+		                    iv.push(randomBinary.bits_.get(j) ? feat : -feat);
+		                }
+		         
+		            }
+		        
+		            unchangedVars = unchangedVars + iv.size();
+		            
+		            
+		            //Compute original unchanged
+		            for (int j : featureIndicesAllowedFlip) {
+		                int feat = j + 1;
+		            
+		                if (!backupBlacklist.contains(feat)) {
+		                	originalUnchanged++;
+		                }
+		         
+		            }
+		            
+			    //-------------------------------------------------------------        
+			            
+			       if (solverIterator.isSatisfiable()) {        	
+			        	int rand = (new Random()).nextInt(3);
+			        	IOrder order;
+			             if (rand == 0) {
+			                 order = new RandomWalkDecorator(new VarOrderHeap(new NegativeLiteralSelectionStrategy()), 1);
+			             } else if (rand == 1) {
+			                 order = new RandomWalkDecorator(new VarOrderHeap(new PositiveLiteralSelectionStrategy()), 1);
+			             } else {
+			                 order = new RandomWalkDecorator(new VarOrderHeap(new RandomLiteralSelectionStrategy()), 1);
+			             } 
+				        		        
+				       ((Solver) solverIterator).setOrder(order); 		
+				       	
+			           int[] partialProd = solverIterator.findModel(iv); // partialProd contains only variables in CNF constraints
+		            
+			           if (partialProd == null) {
+//			        		System.out.println("not satisfiable()");
+			        		unchangedVars = unchangedVars - iv.size();			        		
+			        		iv.clear();
+			        		
+			        		for (int j : featureIndicesAllowedFlip) {
+				                int feat = j + 1;
+				            
+				                if (!backupBlacklist.contains(feat)) {
+				                    iv.push(randomBinary.bits_.get(j) ? feat : -feat);
+				                }
+				         
+				            }
+			        		
+			        		unchangedVars = unchangedVars + iv.size();		
+			        		partialProd = solverIterator.findModel(iv);
+			        		
+			           }
+			           
+			           for (int j = 0; j < partialProd.length; j++) {
+			               int feat = partialProd[j];
+			               
+			               int posFeat = feat > 0 ? feat : -feat;
+			
+			               if (posFeat > 0) {
+			               	randomBinary.setIth(posFeat - 1,feat > 0);
+			               }
+			           }// for	           
+			       } 
+			       else {//if
+			          	System.out.println("solverIterator is not satisfiable()");
+			       }   
+		       }     
+		        
+		       prod  = toProduct(randomBinary);
+
+				//--------------------------end-----------------------------------
+				
+		      	if (!sampleSet.contains(prod)) { // 
+		      		sampleSet.add(prod);// 
+		      		count = count + 1;  
+		    	}	
+		      	
+		      } // while 
+			
+			double unchangedRatio = (double)unchangedVars/nbProds/featureIndicesAllowedFlip.size();
+			double originalUnchangedRatio = (double)originalUnchanged/nbProds/featureIndicesAllowedFlip.size();
+			System.out.println("Unchanged vars = " + unchangedRatio);
+			System.out.println("Original Unchanged vars = " + originalUnchangedRatio);
+			
+			long endTimeMS = System.currentTimeMillis() - startTimeMS;
+			
+			String path = outputDir + NSVariant + "/" + fmFileName +"/Samples/" + sNbProds + "prods/";
+			FileUtils.CheckDir(path); 
+			
+			writeProductsToFile(path + "Products." + i, sampleSet); // write samples
+			writeDataToFile(path + "UnchangedRatio." + i, unchangedRatio);// ratio,percent
+			writeDataToFile(path + "OriginalUnchangedRatio." + i, originalUnchangedRatio);// ratio,percent
+			writeDataToFile(path + "RUNTIME." + i, endTimeMS);// runtime
+			
+		} //for  each run 	
+		
+    } // sampling_PaDrSAT4J
+    
+    
+    /**
+     * @param fmFile
+     * @param outputDir
+     * @param runs
+     * @param nbProds
+     * @throws Exception
+     */
     public void sampling_ProbSAT(String fmFile, String outputDir, int runs, int nbProds) 
     		throws Exception {
 
 		String sNbProds = "" + nbProds;
 		String fmFileName = new File(fmFile).getName();  
 		
-		String NSVariant =  "ProbSAT"; // sampler: ProbSAT
+		String NSVariant =  "ProbSAT"; // sampler: ProbSATWileRepair: continue repairing if not feasible
 		
 		System.out.println("Start sampling..., sampler's name:" + NSVariant);        
 		
@@ -606,6 +1216,72 @@ public class SPL_sampler {
 
         //IVecInt v = bitSetToVecInt(b);
     	List<List<Integer>> constraints =  featureModelConstraints;
+    	HashSet<Integer> temp = new HashSet<Integer>();
+    	
+        int s = 0;
+        for (List<Integer> constraint : constraints) {
+            boolean sat = false;
+
+            for (Integer i : constraint) {
+                int abs = (i < 0) ? -i : i;
+                boolean sign = i > 0;
+                if (b.getIth(abs - 1) == sign) {
+                    sat = true;
+                } else {     
+                	temp.add(abs);
+                }
+            }
+            
+            if (!sat) { // not satisfied,
+                s++;
+                blacklist.addAll(temp);
+                temp.clear();
+            } 
+
+        } // for
+
+        return s;
+    }
+    
+    
+    public int numViolatedConstraints(Binary b, HashSet<Integer> blacklist,HashSet<Integer> backupBlacklist) {
+
+        //IVecInt v = bitSetToVecInt(b);
+    	List<List<Integer>> constraints =  featureModelConstraints;
+    	HashSet<Integer> temp = new HashSet<Integer>();
+    	
+        int s = 0;
+        
+        for (List<Integer> constraint : constraints) {
+            boolean sat = false;
+
+            for (Integer i : constraint) {
+                int abs = (i < 0) ? -i : i;
+                boolean sign = i > 0;
+                if (b.getIth(abs - 1) == sign) {
+                    sat = true;
+                } else {     
+                	temp.add(abs);
+                	backupBlacklist.add(abs);// directly add it 
+                }
+            }
+            
+            if (!sat) { // not satisfied,
+                s++;
+                blacklist.addAll(temp);
+                temp.clear();
+            } 
+
+        } // for
+
+        return s;
+    }
+    
+    
+    public int numViolatedConstraints(Binary b, HashSet<Integer> blacklist1, ArrayList<Integer> blacklist2) {
+
+        //IVecInt v = bitSetToVecInt(b);
+    	List<List<Integer>> constraints =  featureModelConstraints;
 
         int s = 0;
         for (List<Integer> constraint : constraints) {
@@ -617,7 +1293,10 @@ public class SPL_sampler {
                 if (b.getIth(abs - 1) == sign) {
                     sat = true;
                 } else {
-                    blacklist.add(abs);
+                	if (constraint.size() == 1)
+                		blacklist1.add(abs);
+                	else
+                		blacklist2.add(abs);
                 }
             }
             if (!sat) {
@@ -628,6 +1307,9 @@ public class SPL_sampler {
 
         return s;
     }
+    
+    
+    
     public Binary randomProductAssume(Binary bin) {
     	
   		HashSet<Integer> blacklist = new HashSet<Integer>();  	   
@@ -963,11 +1645,11 @@ public class SPL_sampler {
             product = toProduct(repaired);   
 
             if (!isValidProduct(product)) {
-            	product = getOneRandomProductRandomlizedSAT4J();   // SAT4J
-//            	repaired = (Binary) repairSolver.execute(randomBinary);  
+            	product = getOneRandomProductRandomlizedSAT4J();   // SAT4J            	
+//            	repaired = (Binary) repairSolver.execute(repaired);  
 //                product = toProduct(repaired); 
-            	//System.out.println("getOneRandomProductProbSATDiverse: calling getOneRandomProductRandomlizedSAT4J");
-           }	             	                             
+//            	System.out.println("------------------Repair by rSAT4J----------------");
+            }	             	                             
      
         return product;
     }
@@ -998,9 +1680,9 @@ public class SPL_sampler {
             product = toProduct(repaired);   
 
             if (!isValidProduct(product)) {//            
-//            	repaired = (Binary) repairSolver.execute(randomBinary);  
+//            	repaired = (Binary) repairSolver.execute(repaired);  
 //                product = toProduct(repaired);   
-//                System.out.println("********Repair in a while loop****");
+//                System.out.println("********Repair by rSAT4J****");
             	product = getOneRandomProductRandomlizedSAT4J();   // SAT4J
 //            	System.out.println("getOneRandomProductProbSATDiverse: calling getOneRandomProductRandomlizedSAT4J");
            }
@@ -1067,10 +1749,10 @@ public class SPL_sampler {
 	    	 randomBinary.setIth(f, false);    
 	     }
 	                  
-        if (solverIterator.isSatisfiable()) {        	
+        if (solverIterator.isSatisfiable()) {    
+        	
         	IOrder order;
-            order = new RandomWalkDecorator(new VarOrderHeap(new RandomLiteralSelectionStrategy()), 1);
-                        
+            order = new RandomWalkDecorator(new VarOrderHeap(new RandomLiteralSelectionStrategy()), 1);     
         	((Solver) solverIterator).setOrder(order); 
 	
             int[] partialProd = solverIterator.findModel(); // partialProd contains only variables in CNF constraints
@@ -1107,20 +1789,23 @@ public class SPL_sampler {
 	     }
 	            
 	     //----------------------------------------------------------------
-	    HashSet<Integer> blacklist = new HashSet<Integer>();  
-        int violated = numViolatedConstraints(randomBinary, blacklist);        
-        if (violated > 0) {
-            IVecInt iv = new VecInt();
+	     HashSet<Integer> blacklist = new HashSet<Integer>();  
+         HashSet<Integer> backupBlacklist = new HashSet<Integer>();  
+  
+         int violated = numViolatedConstraints(randomBinary, blacklist, backupBlacklist);                       
+          
+         if (violated > 0) {
+              IVecInt iv = new VecInt();
 
-            for (int j : featureIndicesAllowedFlip) {
-                int feat = j + 1;
-
-                if (!blacklist.contains(feat)) {
-                    iv.push(randomBinary.bits_.get(j) ? feat : -feat);
-                }
-
-            }
-        
+              for (int j : featureIndicesAllowedFlip) {
+                  int feat = j + 1;
+              
+                  if (!blacklist.contains(feat)) {
+                      iv.push(randomBinary.bits_.get(j) ? feat : -feat);
+                  }
+           
+              }
+    
 	    //-------------------------------------------------------------        
 	            
 	       if (solverIterator.isSatisfiable()) {        	
@@ -1134,10 +1819,29 @@ public class SPL_sampler {
 	                 order = new RandomWalkDecorator(new VarOrderHeap(new RandomLiteralSelectionStrategy()), 1);
 	             } 
 		        		        
-		       	((Solver) solverIterator).setOrder(order); 		
+		       ((Solver) solverIterator).setOrder(order); 		
 		       	
 	           int[] partialProd = solverIterator.findModel(iv); // partialProd contains only variables in CNF constraints
             
+	           // Have another call
+	           if (partialProd == null) {
+	               System.out.println("not not satisfiable()");
+	                        
+	               iv.clear();
+	               
+	               for (int j : featureIndicesAllowedFlip) {
+	                      int feat = j + 1;
+	                  
+	                      if (!backupBlacklist.contains(feat)) {
+	                          iv.push(randomBinary.bits_.get(j) ? feat : -feat);
+	                      }
+	               
+	                  }	               
+	              
+	               partialProd = solverIterator.findModel(iv);
+	               
+	           }
+	           
 	           for (int j = 0; j < partialProd.length; j++) {
 	               int feat = partialProd[j];
 	               
@@ -1461,6 +2165,180 @@ public class SPL_sampler {
 
           out.newLine();
       }
+      out.close();
+  }
+    
+    public void readFromXML(String path,ArrayList <String> configurationString, ArrayList <Double> performance) {
+
+    	 
+    	  DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+          //2、创建一个DocumentBuilder的对象
+          try {
+              //创建DocumentBuilder对象
+              DocumentBuilder db = dbf.newDocumentBuilder();
+              //3、通过DocumentBuilder对象的parser方法加载books.xml文件到当前项目下
+               Document document = db.parse(path);//传入文件名可以是相对路径也可以是绝对路径
+              //获取所有book节点的集合
+              NodeList dataList = document.getElementsByTagName("row");
+     
+              //遍历每一个节点
+              for (int i = 0; i < dataList.getLength(); i++) {
+                                             
+                  Node data = dataList.item(i);        
+                   
+               //解析data节点的子节点
+                  NodeList childNodes = data.getChildNodes();
+                //遍历childNodes获取每个节点的节点名和节点值                               
+                  
+                  configurationString.add(childNodes.item(0).getFirstChild().getNodeValue());
+                  performance.add(Double.parseDouble(childNodes.item(1).getFirstChild().getNodeValue()));                  
+                  
+//                  for (int k = 0; k < childNodes.getLength(); k++) {
+//                    //区分出text类型的node以及element类型的node
+//                      if(childNodes.item(k).getNodeType() == Node.ELEMENT_NODE){
+//                        //获取了element类型节点的节点名
+//                          System.out.print("第" + (k + 1) + "个节点的节点名：" + childNodes.item(k).getNodeName());                                                  
+//                        //获取了element类型节点的节点值
+//                          System.out.println("--节点值是：" + childNodes.item(k).getFirstChild().getNodeValue());                             
+////                          System.out.println("--节点值是：" + childNodes.item(k).getTextContent());
+//                      }
+//                  }
+                 
+              }
+
+          } catch (ParserConfigurationException e) {
+              e.printStackTrace();
+          } catch (SAXException e) {
+              e.printStackTrace();
+          } catch (IOException e) {
+              e.printStackTrace();
+          }
+    }
+    
+    
+    /**
+     * 将products写入文件
+     * @param outFile
+     * @param products
+     * @throws Exception
+     */
+    public void writeProductsToFileForModelPrediction(String outFile, List<Product> products,String xmlReadFile) throws Exception {
+
+      FileUtils.resetFile(outFile);
+      
+      BufferedWriter out = new BufferedWriter(new FileWriter(outFile));
+          
+//      out.write(products.size() + " products");
+//      out.newLine();
+      
+      String [] featureNames = {"no_asm","no_8x8dct","no_cabac","no_deblock","no_fast_pskip","no_mbtree","no_mixed_refs","no_weightb", 
+      							"rc_lookahead","ref", "rc_lookahead_20","rc_lookahead_40","rc_lookahead_60","ref_1","ref_5","ref_9"};       
+      
+      //Write performance           
+      ArrayList <String> configurationString = new ArrayList <String>();
+      ArrayList <Double> performance = new ArrayList <Double>();
+      
+      //读取数据
+      readFromXML(xmlReadFile,configurationString,performance);
+      
+      
+      // Prefix  
+      out.write("root;no_asm;no_8x8dct;no_cabac;no_deblock;no_fast_pskip;no_mbtree;no_mixed_refs;no_weightb;rc_lookahead;rc_lookahead_20;rc_lookahead_40;rc_lookahead_60;ref;ref_1;ref_5;ref_9;Performance");
+      out.newLine();
+      
+      for (Product product : products) {
+          List<Integer> prodFeaturesList = new ArrayList<Integer>(product);
+          Collections.sort(prodFeaturesList, new Comparator<Integer>() {
+
+              @Override
+              public int compare(Integer o1, Integer o2) {
+                  return ((Integer) Math.abs(o1)).compareTo(((Integer) Math.abs(o2)));
+              }
+          });
+            
+          // The output order is root, 1-9,11-13,10,14-16，          
+          out.write("1;");  
+          
+          int done = 0;
+          for (int i = 0;i < 13 ;i++) {
+        	  
+        	  if (i != 9) {
+	        	  int feature = prodFeaturesList.get(i);
+	        	  
+	        	  if (feature > 0) {
+	        		  out.write("1;");   
+	        		  done++;
+	        	  } else
+	        		  out.write("0;");  
+        	  }
+	  
+          }
+          
+          
+          int feature = prodFeaturesList.get(9);
+         
+          if (feature > 0) {
+    		  out.write("1;");   
+    		  done++;
+          } else
+    		  out.write("0;"); 
+          
+          for (int i = 13; i < 16 ;i++) {        	  
+        	  
+        	  feature = prodFeaturesList.get(i);
+        	  
+        	  if (feature > 0) {
+        		  out.write("1;");   
+        		  done++;
+        	  } else
+        		  out.write("0;");    
+          }
+                    
+
+          StringTokenizer st  = null;
+          
+          int matcheID = -1;
+          boolean found = false;
+          
+          // write performance
+          for (int i = 0; i < configurationString.size();i++) {
+        	  String tempConf = configurationString.get(i);
+        	  
+        	  st = new StringTokenizer(tempConf,",");        	   
+        	  
+        	  if (done == st.countTokens()) {
+        		  boolean matched = true;
+        		  
+        	 	  //Mach
+                  for (int j = 0; j <  prodFeaturesList.size(); j++) {
+                	  
+                      if (prodFeaturesList.get(j) > 0) {
+                    	  String featureName = featureNames[prodFeaturesList.get(j) - 1];
+                    	  
+                    	  if (!tempConf.contains(featureName)) {
+                    		  matched = false; break;
+                    	  }
+                    		  
+                      }
+                      
+                  }
+                  
+                  if (matched == true) {
+                	  matcheID = i; 
+                	  found = true;
+                	  break;
+                  }
+                  
+        	  } // if  (done == st.countTokens())   	  
+       
+        	  if ( found == true)  break;
+          } // for        
+                    
+          out.write(performance.get(matcheID) + ";");   
+
+          out.newLine();
+      }
+      
       out.close();
   }
     
@@ -2232,7 +3110,7 @@ public class SPL_sampler {
     	if (!predictable) {
     		((Solver) dimacsSolver).setOrder(order);
     	}
-    	
+//    	
 //        solverIterator = new ModelIterator(dimacsSolver);
         solverIterator =  dimacsSolver; 
         solverIterator.setTimeoutMs(iteratorTimeout);
@@ -2269,4 +3147,274 @@ public class SPL_sampler {
         System.out.println("-------------initializeModelSolvers end-------------");
     } // end of class   
         
+    
+    /**
+     * Used when calculating indicators
+     * @param fmFile
+     * @param nbPairs
+     * @param t
+     * @throws Exception
+     */
+    public void initializeModelSolversCalIndicators(String fmFile, int t) throws Exception {
+ 
+        if (!new File(fmFile).exists()) {
+            throw new ParameterException("The specified FM file does not exist");
+        }
+
+        this.predictable = false;// 
+        this.dimacs = true; //
+        this.dimacsFile = fmFile;// 
+        
+        //System.out.println("--------------Initialize SAT solvers-------------");
+        /**
+         * ---------------------Initialize SAT4J solvers--------------------------------
+         */
+        dimacsSolver = SolverFactory.instance().createSolverByName("MiniSAT");
+        dimacsSolver.setTimeout(SATtimeout);
+
+        DimacsReader dr = new DimacsReader(dimacsSolver);
+        dr.parseInstance(new FileReader(fmFile));
+        
+    	if (!predictable) {
+    		((Solver) dimacsSolver).setOrder(order);
+    	}
+    	
+//        solverIterator = new ModelIterator(dimacsSolver);
+        solverIterator =  dimacsSolver; 
+        solverIterator.setTimeoutMs(iteratorTimeout);
+        // ---------------------Initialize SAT4J solvers（End）-------------------------------
+         
+        //System.out.println("--------------读取特征、约束及core、dead features-------------");
+        /**
+         * ---------------------Load features, constraints, core and dead features---------------------
+         */
+        featuresList   = new ArrayList<Integer>();
+        featuresMap    = new HashMap<Integer, String>(); 
+        featuresMapRev = new HashMap<String, Integer>(); 
+       
+        computeFeatures(null, featuresMap, featuresMapRev, featuresList, true, fmFile);
+        computeConstraints(null, true, fmFile);               
+        
+        System.out.println("numFeatures "  + numFeatures);
+        System.out.println("numConstraints "  + nConstraints);
+        
+        //Read indexes for mandatory and dead features (= ID-1)
+//        loadMandatoryDeadFeaturesIndices(fmFile+".mandatory", fmFile+".dead");
+        // ---------------------Load features, constraints, core and dead features (end)--------------------
+             
+        // Initialize probSAT solver      
+//        HashMap  localSearchParameters ;     
+//        localSearchParameters = new HashMap() ;
+//        localSearchParameters.put("constraints",featureModelConstraints); //featureModelConstraints 在computeConstraints中读取了
+//        localSearchParameters.put("num_vars",numFeatures); 
+//        localSearchParameters.put("max_flips",8000);
+//        localSearchParameters.put("wp", 0.567);
+//
+//        repairSolver = new ProbSATLocalSearch(localSearchParameters);// ProbSAT                    
+           
+        //-------------------------------Not used when running --------------------
+        // Read T-set            
+        String validTsetFile = fmFile + ".valid" + t + "-Set"  ;    	     
+    
+        if (validTsetFile != null && (new File(validTsetFile).exists())) {        	
+        	validTSets = loadValidTSet(validTsetFile);  
+        	System.out.println("Number of validTSets " + validTSets.size());
+        	
+        } else {
+        	
+        	System.out.println("---------Generate validTSets------------");
+        	
+        	if(t <= 5 && numFeatures <= 30) {
+        		validTSets = computeExactValidTSet(featuresMap, featuresList, null, false, null, t);// 精确算法
+        	}else  if (t == 2 && numFeatures > 30 && numFeatures <= 1000)  {
+        		validTSets = computeExactValidTSet(featuresMap, featuresList, null, false, null, t);// 精确算法
+        	} else if (t == 3 && numFeatures > 30  && numFeatures <= 90) {
+        		validTSets = computeExactValidTSet(featuresMap, featuresList, null, false, null, t);// 精确算法
+        	} else {
+        		
+        		int  nbPairs;        		
+    			         		
+           		nbPairs = t * 25000; // Any number you prefer. 
+        		
+        		System.out.println("Number of valid sets to be generated " + nbPairs);
+        		
+        		validTSets = computeNRandValidTSets(featuresMap, featuresList, nbPairs, t);
+        	}
+        		
+        	writeValidPairsToFile(validTsetFile, validTSets);
+        	
+        }  // IF  
+       
+        System.out.println("-------------initializeModelSolvers end-------------");
+    } // end of class
+    
+    public Set<TSet> loadValidTSet(String validFile) throws Exception {
+        if (!new File(validFile).exists()) {
+            throw new ParameterException("The specified valid file does not exist");
+        }
+
+        LineNumberReader lnr = new LineNumberReader(new FileReader(validFile));
+        lnr.skip(Long.MAX_VALUE);
+
+        List<TSet> tset = new ArrayList<TSet>(lnr.getLineNumber());
+
+        BufferedReader in = new BufferedReader(new FileReader(validFile));
+        String line;
+
+        while ((line = in.readLine()) != null) {
+            if (!line.isEmpty()) {
+                StringTokenizer st = new StringTokenizer(line, ";");
+
+                TSet set = new TSet();
+                
+                while (st.hasMoreTokens()) {
+	                set.add(Integer.parseInt(st.nextToken()));	               
+                }
+                
+                tset.add(set);
+            }//if
+        }
+
+        in.close();
+
+        Set<TSet> validTSet = new HashSet<TSet>(tset);
+        return validTSet;
+    }
+    
+    private Set<TSet> computeExactValidTSet(Map<Integer, String> featuresMap, List<Integer> featuresList,
+            String outFile, boolean dimacs, ISolver dimacsSolver, int t) throws Exception {    
+
+        Set<TSet> pairs = new HashSet<TSet>(); 
+
+        int size = featuresList.size();
+
+        nCk(size, t, pairs, featuresMap, featuresList);
+//        System.out.println(pairs);
+        System.out.println("number of valid T-sets " + pairs.size());
+        return pairs;
+    }
+    
+    public void nCk(int n, int k, Set<TSet> tsets, Map<Integer, String> featuresMap, List<Integer> featuresList) throws Exception {
+        int[] a = new int[k];
+        nCkH(n, k, 0, a, k, tsets, featuresMap, featuresList);
+    }
+    
+    public void nCkH(int n, int loopno, int ini, int[] a, int k, Set<TSet> tsets, Map<Integer, String> featuresMap, List<Integer> featuresList) throws Exception {
+
+        if (k == 0) {
+            return;
+        }
+
+        int i;
+        loopno--;
+        if (loopno < 0) {
+            a[k - 1] = ini - 1;
+            TSet p = new TSet();
+            for (i = 0; i < k; i++) {
+                p.add(featuresList.get(a[i]));
+            }
+            if (isValidPair(p, featuresMap, featuresList)) {
+                tsets.add(p);
+            }
+            return;
+
+        }
+        for (i = ini; i <= n - loopno - 1; i++) {
+            a[k - 1 - loopno] = i;
+            nCkH(n, loopno, i + 1, a, k, tsets, featuresMap, featuresList);
+        }
+    }
+    
+    private Set<TSet> computeNRandValidTSets(Map<Integer, String> featuresMap, List<Integer> featuresList, int n, int t) throws Exception {
+
+        Set<TSet> pairs = new HashSet<TSet>(n);
+
+        int size = featuresList.size();
+        double total = getBinomCoeff(size, t);
+        while (pairs.size() < n) {
+            TSet set = getITSet(size, t, Math.floor(Math.random() * total), featuresList);
+            if (isValidPair(set, featuresMap, featuresList)) {
+                pairs.add(set);
+            }
+        }
+        return pairs;
+    }
+    
+    public double getBinomCoeff(int n, int k) {
+        if (k > n) {
+            return 0.0;
+        } else if (n == k || k == 0) {
+            return 1.0;
+        } else {
+            return ArithmeticUtils.binomialCoefficientDouble(n, k);
+        }
+    }
+
+    public TSet getITSet(int n, int k, double m, List<Integer> featuresList) {
+
+        double total = getBinomCoeff(n, k);
+        if (m >= total) {
+            m = total - 1.0;
+        }
+        TSet tSet = new TSet();
+        int a = n;
+        int b = k;
+        double x = (total - 1.0) - m;  // x is the "dual" of m
+
+        for (int i = 0; i < k; i++) {
+            a = largestV(a, b, x);          // largest value v, where v < a and vCb < x
+            x = x - getBinomCoeff(a, b);
+            b = b - 1;
+            tSet.add(featuresList.get(n - 1 - a));
+        }
+
+        return tSet;
+    }
+    
+    private int largestV(int a, int b, double x) {
+        int v = a - 1;
+
+        while (getBinomCoeff(v, b) > x) {
+            v--;
+        }
+
+        return v;
+    } // LargestV()
+    
+    /**
+     * 计算一个测试集中，每个测试实例的（部分）覆盖率。注意：不是绝对覆盖率。如果t-set不准确，则覆盖率不太可靠
+     * @param products
+     * @param pairs
+     */
+    public void computeProductsPartialCoverage(List<Product> products, Set<TSet> pairs) {
+        double pairsSize = pairs.size();
+        Set<TSet> pairsCopy = new HashSet<TSet>(pairs);
+        for (Product product : products) {
+            int initialSize = pairsCopy.size();
+            Set<TSet> productPairs = product.computePartialCoveredPairs(pairsCopy);
+            pairsCopy.removeAll(productPairs);
+            double removed = initialSize - pairsCopy.size();
+            double coverage = removed / pairsSize * 100.0;
+            product.setCoverage(coverage);
+        }
+        pairsCopy = null;
+    }
+
+    /**
+     * @param products
+     * @param pairs
+     */
+    public void computeProductsPartialFaults(List<Product> products, Set<TSet> pairs) {
+        double pairsSize = pairs.size();
+        Set<TSet> pairsCopy = new HashSet<TSet>(pairs);
+        for (Product product : products) {
+            int initialSize = pairsCopy.size();
+            Set<TSet> productPairs = product.computePartialCoveredPairs(pairsCopy);
+            pairsCopy.removeAll(productPairs);
+            double removed = initialSize - pairsCopy.size();           
+            product.setCoverage(removed);
+        }
+        
+        pairsCopy = null;
+    }
 }
